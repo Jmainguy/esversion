@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v7"
 	"golang.org/x/term"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -18,9 +17,24 @@ import (
 )
 
 func parseResponse(response aggResponse) {
+	beatVersions := make(map[string]string)
+	version := make(map[string]bool)
 	for _, bucket := range response.Aggregations.SixX_hostver.Buckets {
-		fmt.Println(bucket.Key.Hostname)
+		fmt.Printf("%s beat.version: %s\n", bucket.Key.Hostname, bucket.Key.Version)
+		version[bucket.Key.Version] = true
 	}
+	for _, bucket := range response.Aggregations.SevenX_hostver.Buckets {
+		beatVersions[bucket.Key.Hostname] = bucket.Key.Version
+		version[bucket.Key.Version] = true
+	}
+	// Print results
+	for k, v := range beatVersions {
+		fmt.Printf("%s beat.version: %s\n", k, v)
+	}
+	for key, _ := range version {
+		fmt.Println(key)
+	}
+
 }
 
 func main() {
@@ -91,8 +105,6 @@ func main() {
 		client.Search.WithTrackTotalHits(true),
 	)
 
-	fmt.Println(string(jojo))
-
 	// Check for any errors returned by API call to Elasticsearch
 	if err != nil {
 		log.Fatalf("Elasticsearch Search() API ERROR:", err)
@@ -102,9 +114,6 @@ func main() {
 		response := aggResponse{}
 		json.NewDecoder(res.Body).Decode(&response)
 		parseResponse(response)
-		bodyBytes, _ := ioutil.ReadAll(res.Body)
-		fmt.Println(string(bodyBytes))
-		fmt.Println(res.StatusCode)
 
 		defer res.Body.Close()
 
