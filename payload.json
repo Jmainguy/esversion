@@ -1,0 +1,29 @@
+{
+  "size": "10000",
+  "query": {
+    "bool": {
+      "must": [],
+      "filter": [
+        {
+          "match_all": {}
+        },
+        {
+          "exists": {
+            "field": "beat.version"
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "2021-06-15T22:01:51.220Z",
+              "lte": "2021-06-15T22:16:51.220Z",
+              "format": "strict_date_optional_time"
+            }
+          }
+        }
+      ],
+      "should": [],
+      "must_not": []
+    }
+  }
+}
