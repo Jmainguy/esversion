@@ -1,29 +1,59 @@
 {
-  "size": "10000",
+  "size": 0,
   "query": {
     "bool": {
-      "must": [],
-      "filter": [
-        {
-          "match_all": {}
-        },
-        {
-          "exists": {
-            "field": "beat.version"
-          }
-        },
-        {
-          "range": {
-            "@timestamp": {
+      "filter": {
+        "range": {
+          "@timestamp": {
               "gte": "2021-06-15T22:01:51.220Z",
-              "lte": "2021-06-15T22:16:51.220Z",
-              "format": "strict_date_optional_time"
-            }
+              "lte": "2021-06-15T22:16:51.220Z"
           }
         }
-      ],
-      "should": [],
-      "must_not": []
+      }
+    }
+  },
+  "aggs": {
+    "6x-hostver": {
+      "composite": {
+        "size": 10000,
+        "sources": [
+          {
+            "hostname": {
+              "terms": {
+                "field": "beat.hostname"
+              }
+            }
+          },
+          {
+            "version": {
+              "terms": {
+                "field": "beat.version"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "7x-hostver": {
+      "composite": {
+        "size": 10000,
+        "sources": [
+                    {
+            "hostname": {
+              "terms": {
+                "field": "agent.hostname"
+              }
+            }
+          },
+          {
+            "version": {
+              "terms": {
+                "field": "agent.version"
+              }
+            }
+          }
+        ]
+      }
     }
   }
 }
